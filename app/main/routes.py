@@ -1,7 +1,7 @@
 from flask import render_template, flash, redirect, url_for, request, abort
 from app import db
 from app.main import bp
-from app.main.forms import AttendanceForm, ReassignmentForm, ReassignmentRequestForm
+from app.main.forms import AttendanceForm, ReassignmentForm
 from flask_login import current_user, login_required
 from app.models import User, Schedule
 from datetime import date, timedelta
@@ -171,7 +171,7 @@ def request_reassignment(schedule_id):
         flash('You can only request reassignment for your own schedule.', 'danger')
         return redirect(url_for('main.index'))
 
-    form = ReassignmentRequestForm()
+    form = ReassignmentForm()
     if form.validate_on_submit():
         schedule_entry.reassignment_request = True
         schedule_entry.reassignment_reason = form.reason.data
