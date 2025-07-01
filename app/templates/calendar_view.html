@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+<div class="min-h-screen py-8 px-4">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent mb-4">
+                {{ current_month.strftime('%B %Y') }} Office Calendar
+            </h1>
+            <p class="text-slate-400">
+                Office days: Tuesday, Wednesday, Friday • Click on a week to view details
+            </p>
+        </div>
+
+        <!-- Calendar Navigation -->
+        <div class="flex justify-between items-center mb-6">
+            <a href="{{ url_for('main.calendar_view', year=prev_month.year, month=prev_month.month) }}" 
+               class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                {{ prev_month.strftime('%b %Y') }}
+            </a>
+            
+            <div class="text-center">
+                <h2 class="text-2xl font-semibold text-white">{{ current_month.strftime('%B %Y') }}</h2>
+            </div>
+            
+            <a href="{{ url_for('main.calendar_view', year=next_month.year, month=next_month.month) }}" 
+               class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+                {{ next_month.strftime('%b %Y') }}
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+
+        <!-- Calendar Grid -->
+        <div class="bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-xl overflow-hidden">
+            <!-- Day Headers -->
+            <div class="grid grid-cols-7 bg-slate-800/50 border-b border-slate-700/50">
+                {% for day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] %}
+                <div class="p-4 text-center font-semibold text-slate-300 border-r border-slate-700/50 last:border-r-0">
+                    {{ day }}
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Calendar Weeks -->
+            {% for week in calendar_weeks %}
+            <div class="grid grid-cols-7 border-b border-slate-700/50 last:border-b-0 hover:bg-slate-800/30 transition-colors cursor-pointer" 
+                 onclick="window.location.href='{{ url_for('main.week_view', week_start=week.week_start.isoformat()) }}'">
+                {% for day in week.days %}
+                <div class="p-4 border-r border-slate-700/50 last:border-r-0 min-h-[100px] relative">
+                    <!-- Date Number -->
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-sm {% if day.is_current_month %}text-white{% else %}text-slate-500{% endif %} {% if day.is_today %}bg-cyan-500 text-white px-2 py-1 rounded-full{% endif %}">
+                            {{ day.date.day }}
+                        </span>
+                        {% if day.is_office_day and day.is_current_month %}
+                        <span class="text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded border border-purple-500/30">
+                            Office
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Office Day Indicator -->
+                    {% if day.is_office_day and day.is_current_month %}
+                    <div class="space-y-1">
+                        {% if day.schedule_info %}
+                        <div class="text-xs">
+                            <div class="bg-emerald-900/20 text-emerald-300 px-2 py-1 rounded border border-emerald-500/20">
+                                {{ day.schedule_info.attending }} attending
+                            </div>
+                            {% if day.schedule_info.user_status %}
+                            <div class="mt-1 bg-cyan-900/20 text-cyan-300 px-2 py-1 rounded border border-cyan-500/20">
+                                You: {{ day.schedule_info.user_status }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="text-xs text-slate-400">
+                            No schedule yet
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Week indicator -->
+                    {% if day.date.weekday() == 0 %}  <!-- Monday -->
+                    <div class="absolute bottom-2 left-2 text-xs text-slate-500">
+                        Week {{ day.date.isocalendar()[1] }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Legend -->
+        <div class="mt-6 flex flex-wrap justify-center gap-6 text-sm">
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 bg-purple-500/20 border border-purple-500/30 rounded"></div>
+                <span class="text-slate-300">Office Day</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 bg-emerald-500/20 border border-emerald-500/30 rounded"></div>
+                <span class="text-slate-300">Has Attendees</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 bg-cyan-500 rounded-full"></div>
+                <span class="text-slate-300">Today</span>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-8 text-center">
+            <a href="{{ url_for('main.index') }}" 
+               class="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white py-3 px-6 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105">
+                Go to Current Week
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

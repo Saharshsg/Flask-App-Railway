@@ -165,4 +165,30 @@ h1, h2, h3, h4, h5, h6 {
 
 .card {
     animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Basic responsive adjustments */
+@media (max-width: 768px) {
+    /* On smaller screens, we can reduce padding and font sizes for a better fit */
+    body {
+        font-size: 0.9rem;
+    }
+
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    /* Make tables scrollable horizontally on small screens */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Further adjustments for very small screens */
+    .display-4 {
+        font-size: 2.5rem;
+    }
 } 

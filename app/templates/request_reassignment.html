@@ -1,30 +1,67 @@
 {% extends "base.html" %}
-{% import 'bootstrap4/form.html' as wtf %}
 
 {% block app_content %}
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <div class="card">
-                <div class="card-header">
-                    <h1 class="card-title">Request Reassignment</h1>
+<div class="min-h-screen py-8 px-4">
+    <div class="max-w-2xl mx-auto">
+        <!-- Glowing card container -->
+        <div class="group relative">
+            <div class="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
+            <div class="relative bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-xl p-8">
+                
+                <!-- Header -->
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 mb-4">
+                        Request Reassignment
+                    </h1>
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
+                        <p class="text-slate-300 leading-relaxed">
+                            You are requesting a reassignment for your spot on 
+                            <span class="text-cyan-400 font-semibold">{{ schedule_entry.date.strftime('%A, %B %d, %Y') }}</span>.
+                        </p>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <p class="lead">You are requesting a reassignment for your spot on <strong>{{ schedule_entry.date.strftime('%A, %B %d, %Y') }}</strong>.</p>
-                    <hr>
-                    <form method="POST" class="form" role="form">
-                        {{ form.hidden_tag() }}
-                        
-                        <div class="mb-3">
-                            {{ wtf.render_field(form.reason, rows=4, placeholder="Please provide a brief reason for your request...") }}
-                        </div>
-                        
-                        <div class="mt-4">
-                            {{ wtf.render_field(form.submit, class="btn btn-primary") }}
-                            <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Cancel</a>
-                        </div>
-                    </form>
-                </div>
+
+                <!-- Form -->
+                <form method="POST" class="space-y-6">
+                    {{ form.hidden_tag() }}
+                    
+                    <div>
+                        <label for="{{ form.reason.id }}" class="block text-sm font-medium text-cyan-300 mb-2">
+                            Reason for Request
+                        </label>
+                        <textarea 
+                            id="{{ form.reason.id }}" 
+                            name="{{ form.reason.name }}" 
+                            rows="4" 
+                            placeholder="Please provide a brief reason for your request..."
+                            class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 focus:outline-none transition-colors duration-200"
+                            required
+                        >{{ form.reason.data or '' }}</textarea>
+                        {% if form.reason.errors %}
+                            <div class="mt-2 text-red-400 text-sm">
+                                {% for error in form.reason.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Action buttons -->
+                    <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                        <button 
+                            type="submit" 
+                            class="flex-1 bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white py-3 px-6 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+                        >
+                            Submit Request
+                        </button>
+                        <a 
+                            href="{{ url_for('main.index') }}" 
+                            class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-3 px-6 rounded-lg font-semibold border border-slate-600 transition-colors duration-200 text-center focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+                        >
+                            Cancel
+                        </a>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

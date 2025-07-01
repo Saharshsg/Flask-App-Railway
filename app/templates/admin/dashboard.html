@@ -1,190 +1,260 @@
 {% extends "base.html" %}
 
 {% block app_content %}
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="display-5">Admin Dashboard</h1>
-        <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Back to Home
-        </a>
-    </div>
-
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="mb-0">Daily Schedule</h2>
-        <div>
-            <a href="{{ url_for('admin.manage_users') }}" class="btn btn-primary">Manage Users</a>
+<div class="min-h-screen py-8 px-4">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header Section -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">
+                Admin Dashboard
+            </h1>
+            <a href="{{ url_for('main.index') }}" 
+               class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white py-2 px-4 rounded-lg border border-slate-600 transition-colors duration-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Back to Home
+            </a>
         </div>
-    </div>
 
-    <div class="row">
-        {% for day_name, details in schedule_data.items() %}
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-header">
-                        <h5 class="mb-0">{{ day_name }}</h5>
-                        <p class="mb-0 text-muted">{{ details.date.strftime('%B %d, %Y') }}</p>
-                    </div>
-                    <div class="card-body">
-                        <h6 class="card-subtitle mb-2 text-muted">
-                            Total Attending: <span class="badge bg-primary rounded-pill">{{ details.total_attendees }}</span>
-                        </h6>
-                        <h6 class="card-subtitle mb-3 text-muted">
-                            Meals: 
-                            <span class="badge bg-success-subtle text-success-emphasis rounded-pill">Veg: {{ details.veg_count }}</span>
-                            <span class="badge bg-danger-subtle text-danger-emphasis rounded-pill">Non-Veg: {{ details.non_veg_count }}</span>
-                        </h6>
+        <!-- Sub Header -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+                <h2 class="text-2xl font-semibold text-cyan-300">Daily Schedule</h2>
+                <p class="text-slate-400 text-sm mt-1">
+                    Week of {{ week_start.strftime('%B %d, %Y') }} • 
+                    {% if is_week_locked %}
+                    <span class="text-red-400">🔒 Locked</span>
+                    {% else %}
+                    <span class="text-green-400">🔓 Unlocked</span>
+                    {% endif %}
+                </p>
+            </div>
+            <div class="flex flex-wrap gap-3">
+                <!-- Week Lock/Unlock Button -->
+                <form method="POST" action="{{ url_for('admin.toggle_week_lock') }}" class="inline">
+                    <input type="hidden" name="week_start" value="{{ week_start.isoformat() }}">
+                    {% if is_week_locked %}
+                    <button type="submit" 
+                            class="bg-green-600 hover:bg-green-500 text-white py-2 px-4 rounded-lg font-semibold transition-colors"
+                            onclick="return confirm('Unlock this week for employee access?')">
+                        🔓 Unlock Week
+                    </button>
+                    {% else %}
+                    <button type="submit" 
+                            class="bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded-lg font-semibold transition-colors"
+                            onclick="return confirm('Lock this week to prevent employee changes?')">
+                        🔒 Lock Week
+                    </button>
+                    {% endif %}
+                </form>
+                
+                <a href="{{ url_for('admin.manage_weeks') }}" 
+                   class="bg-slate-700 hover:bg-slate-600 text-white py-2 px-4 rounded-lg font-semibold transition-colors">
+                    Manage Weeks
+                </a>
+                
+                <a href="{{ url_for('admin.manage_users') }}" 
+                   class="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white py-2 px-6 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105">
+                    Manage Users
+                </a>
+            </div>
+        </div>
 
-                        <div class="accordion" id="accordion-{{ day_name }}">
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="headingOne-{{ day_name }}">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne-{{ day_name }}" aria-expanded="false" aria-controls="collapseOne-{{ day_name }}">
-                                        <strong>Attending ({{ details.attendees|length }})</strong>
-                                    </button>
-                                </h2>
-                                <div id="collapseOne-{{ day_name }}" class="accordion-collapse collapse" aria-labelledby="headingOne-{{ day_name }}" data-bs-parent="#accordion-{{ day_name }}">
-                                    <div class="accordion-body p-0">
-                                        <ul class="list-group list-group-flush">
-                                            {% for entry in details.attendees %}
-                                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                    <div>
-                                                        {{ entry.user.username }}
-                                                        <span class="badge bg-info-subtle text-info-emphasis rounded-pill ms-2">{{ entry.meal_preference }}</span>
-                                                        {% if entry.reassignment_request %}
-                                                            <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill ms-1" 
-                                                                  data-bs-toggle="tooltip" 
-                                                                  data-bs-placement="top" 
-                                                                  title="Reason: {{ entry.reassignment_reason }}">
-                                                                <i class="bi bi-exclamation-triangle-fill"></i> Request Pending
-                                                            </span>
-                                                        {% endif %}
-                                                    </div>
-                                                    <a href="{{ url_for('admin.swap_user', schedule_id=entry.id) }}" class="btn btn-outline-warning btn-sm">
-                                                        <i class="bi bi-arrow-repeat"></i> Swap
-                                                    </a>
-                                                </li>
-                                            {% else %}
-                                                <li class="list-group-item">None</li>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="headingTwo-{{ day_name }}">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo-{{ day_name }}" aria-expanded="false" aria-controls="collapseTwo-{{ day_name }}">
-                                        <strong>Not Attending ({{ details.absentees|length }})</strong>
-                                    </button>
-                                </h2>
-                                <div id="collapseTwo-{{ day_name }}" class="accordion-collapse collapse" aria-labelledby="headingTwo-{{ day_name }}" data-bs-parent="#accordion-{{ day_name }}">
-                                    <div class="accordion-body p-0">
-                                        <ul class="list-group list-group-flush">
-                                            {% for entry in details.absentees %}
-                                                <li class="list-group-item">{{ entry.user.username }}</li>
-                                            {% else %}
-                                                <li class="list-group-item">None</li>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                </div>
+        <!-- Schedule Cards Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+            {% for day_name, details in schedule_data.items() %}
+                <div class="group relative">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
+                    <div class="relative bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-xl overflow-hidden">
+                        
+                        <!-- Card Header -->
+                        <div class="bg-slate-800/50 border-b border-slate-700/50 p-6">
+                            <h3 class="text-xl font-bold text-white mb-1">{{ day_name }}</h3>
+                            <p class="text-slate-400 text-sm">{{ details.date.strftime('%B %d, %Y') }}</p>
+                            
+                            <!-- Stats Row -->
+                            <div class="flex flex-wrap gap-2 mt-4">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-cyan-900/20 text-cyan-300 border border-cyan-500/20">
+                                    {{ details.total_attendees }} Attending
+                                </span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-900/20 text-emerald-300 border border-emerald-500/20">
+                                    Veg: {{ details.veg_count }}
+                                </span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-900/20 text-orange-300 border border-orange-500/20">
+                                    Non-Veg: {{ details.non_veg_count }}
+                                </span>
+                                {% if details.no_meal_count > 0 %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-slate-900/20 text-slate-300 border border-slate-500/20">
+                                    No Meal: {{ details.no_meal_count }}
+                                </span>
+                                {% endif %}
                             </div>
                         </div>
 
-                        <h6 class="card-subtitle mb-2 text-muted">Attendees ({{ details.total_attendees }}/{{ OFFICE_CAPACITY }})</h6>
-                        <ul class="list-group list-group-flush">
-                            {% for entry in details.attendees %}
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>
-                                        {{ entry.user.username }} 
-                                        <small class="text-muted">({{ entry.meal_preference }})</small>
-                                        {% if entry.was_auto_assigned %}<span class="badge bg-warning text-dark">Auto</span>{% endif %}
-                                    </span>
-                                    <div>
-                                        {% if entry.reassignment_request %}
-                                            <span class="badge bg-info">Swap Requested</span>
-                                        {% endif %}
-                                        <a href="{{ url_for('admin.swap_user', schedule_id=entry.id) }}" class="btn btn-outline-secondary btn-sm">Swap</a>
+                        <!-- Card Body -->
+                        <div class="p-6 space-y-6">
+                            
+                            <!-- Attendees Section -->
+                            <div>
+                                <h4 class="text-lg font-semibold text-cyan-300 mb-3 flex items-center gap-2">
+                                    <div class="w-2 h-2 bg-cyan-400 rounded-full"></div>
+                                    Attending ({{ details.attendees|length }})
+                                </h4>
+                                {% if details.attendees %}
+                                    <div class="space-y-2 max-h-48 overflow-y-auto">
+                                        {% for entry in details.attendees %}
+                                            <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-3 flex justify-between items-center">
+                                                <div class="flex flex-col">
+                                                    <span class="text-white font-medium">{{ entry.user.username }}</span>
+                                                    <div class="flex flex-wrap gap-1 mt-1">
+                                                        <span class="text-xs px-2 py-0.5 bg-blue-900/20 text-blue-300 rounded border border-blue-500/20">
+                                                            {{ entry.meal_preference }}
+                                                        </span>
+                                                        {% if entry.was_auto_assigned %}
+                                                            <span class="text-xs px-2 py-0.5 bg-yellow-900/20 text-yellow-300 rounded border border-yellow-500/20">
+                                                                Auto
+                                                            </span>
+                                                        {% endif %}
+                                                        {% if entry.reassignment_request %}
+                                                            <span class="text-xs px-2 py-0.5 bg-orange-900/20 text-orange-300 rounded border border-orange-500/20" 
+                                                                  title="Reason: {{ entry.reassignment_reason }}">
+                                                                Swap Requested
+                                                            </span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <a href="{{ url_for('admin.swap_user', schedule_id=entry.id) }}" 
+                                                   class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-300 py-1 px-2 rounded border border-slate-600 transition-colors duration-200">
+                                                    Swap
+                                                </a>
+                                            </div>
+                                        {% endfor %}
                                     </div>
-                                </li>
-                            {% else %}
-                                <li class="list-group-item">No one is scheduled to come in yet.</li>
-                            {% endfor %}
-                        </ul>
-
-                        {% if details.available_for_swap %}
-                        <h6 class="card-subtitle mb-2 mt-3 text-muted">Available for Swap</h6>
-                        <ul class="list-group list-group-flush">
-                            {% for entry in details.available_for_swap %}
-                                <li class="list-group-item">{{ entry.user.username }}</li>
-                            {% endfor %}
-                        </ul>
-                        {% endif %}
-                    </div>
-                    {% if whatsapp_messages.get(day_name) or details.total_attendees < OFFICE_CAPACITY %}
-                    <div class="card-footer bg-light">
-                        {% if whatsapp_messages.get(day_name) %}
-                            <h6 class="mb-2">WhatsApp Message</h6>
-                            <div class="position-relative">
-                               <textarea class="form-control" id="whatsapp-msg-{{ day_name }}" rows="6" readonly>{{ whatsapp_messages[day_name] }}</textarea>
-                               <button class="btn btn-sm btn-secondary position-absolute top-0 end-0 m-2" 
-                                       onclick="copyToClipboard('whatsapp-msg-{{ day_name }}', this)"
-                                       data-bs-toggle="tooltip" data-bs-placement="top" title="Copy to clipboard">
-                                    <i class="bi bi-clipboard"></i>
-                               </button>
+                                {% else %}
+                                    <p class="text-slate-500 italic text-sm">No one is scheduled to come in yet.</p>
+                                {% endif %}
                             </div>
-                        {% endif %}
 
-                        {% if details.total_attendees < OFFICE_CAPACITY %}
-                            <div class="mt-3">
-                                <form action="{{ url_for('admin.auto_assign', date_iso=details.date.isoformat()) }}" method="POST" onsubmit="return confirm('This will automatically assign interns and fill remaining slots for {{ day_name }}. This action cannot be undone. Are you sure?');">
-                                    <button type="submit" class="btn btn-info w-100">
-                                        <i class="bi bi-magic"></i> Auto-Assign & Fill Slots
+                            <!-- Not Attending Section -->
+                            {% if details.absentees %}
+                            <div>
+                                <h4 class="text-lg font-semibold text-red-300 mb-3 flex items-center gap-2">
+                                    <div class="w-2 h-2 bg-red-400 rounded-full"></div>
+                                    Not Attending ({{ details.absentees|length }})
+                                </h4>
+                                <div class="space-y-2 max-h-32 overflow-y-auto">
+                                    {% for entry in details.absentees %}
+                                        <div class="bg-slate-800/30 border border-slate-700/50 rounded-lg p-2">
+                                            <span class="text-slate-400 text-sm">{{ entry.user.username }}</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Available for Swap -->
+                            {% if details.available_for_swap %}
+                            <div>
+                                <h4 class="text-lg font-semibold text-green-300 mb-3 flex items-center gap-2">
+                                    <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+                                    Available for Swap
+                                </h4>
+                                <div class="space-y-2">
+                                    {% for entry in details.available_for_swap %}
+                                        <div class="bg-green-900/10 border border-green-500/20 rounded-lg p-2">
+                                            <span class="text-green-300 text-sm">{{ entry.user.username }}</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Card Footer -->
+                        {% if whatsapp_messages.get(day_name) or details.total_attendees < OFFICE_CAPACITY %}
+                        <div class="border-t border-slate-700/50 p-6 space-y-4">
+                            {% if whatsapp_messages.get(day_name) %}
+                                <div>
+                                    <h5 class="text-cyan-300 font-semibold mb-2">WhatsApp Message</h5>
+                                    <div class="relative">
+                                        <textarea 
+                                            id="whatsapp-msg-{{ day_name }}" 
+                                            readonly 
+                                            rows="4"
+                                            class="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-slate-300 text-sm resize-none focus:outline-none"
+                                        >{{ whatsapp_messages[day_name] }}</textarea>
+                                        <button 
+                                            onclick="copyToClipboard('whatsapp-msg-{{ day_name }}', this)"
+                                            class="absolute top-2 right-2 bg-slate-700 hover:bg-slate-600 text-slate-300 p-1 rounded transition-colors duration-200"
+                                            title="Copy to clipboard"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if details.total_attendees < OFFICE_CAPACITY %}
+                                <form action="{{ url_for('admin.auto_assign', date_iso=details.date.isoformat()) }}" method="POST" 
+                                      onsubmit="return confirm('This will automatically assign interns and fill remaining slots for {{ day_name }}. This action cannot be undone. Are you sure?');">
+                                    <button type="submit" 
+                                            class="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white py-2 px-4 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                        </svg>
+                                        Auto-Assign & Fill Slots
                                     </button>
                                 </form>
-                            </div>
+                            {% endif %}
+                        </div>
                         {% endif %}
                     </div>
-                    {% endif %}
+                </div>
+            {% else %}
+                <div class="col-span-full text-center py-12">
+                    <p class="text-slate-500 text-lg">No schedule data available for this week yet.</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Clear Schedule Section -->
+        <div class="flex justify-center">
+            <div class="group relative">
+                <div class="absolute -inset-1 bg-gradient-to-r from-red-500 to-pink-500 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
+                <div class="relative bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+                    <form action="{{ url_for('admin.clear_schedule') }}" method="POST" 
+                          onsubmit="return confirm('Are you sure you want to delete all schedule entries? This action cannot be undone.');">
+                        <button type="submit" 
+                                class="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white py-3 px-6 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            Clear All Schedule Records
+                        </button>
+                    </form>
                 </div>
             </div>
-        {% else %}
-            <p>No schedule data available for this week yet.</p>
-        {% endfor %}
+        </div>
     </div>
+</div>
 
-    <div class="container-fluid mt-3">
-        <form action="{{ url_for('admin.clear_schedule') }}" method="POST" onsubmit="return confirm('Are you sure you want to delete all schedule entries? This action cannot be undone.');">
-            <button type="submit" class="btn btn-danger">Clear All Schedule Records</button>
-        </form>
-    </div>
-{% endblock %}
-
-{% block scripts %}
-{{ super() }}
 <script>
 function copyToClipboard(elementId, button) {
     const textarea = document.getElementById(elementId);
     textarea.select();
     navigator.clipboard.writeText(textarea.value).then(() => {
         const originalIcon = button.innerHTML;
-        button.innerHTML = '<i class="bi bi-check-lg"></i>';
-        
-        const tooltip = new bootstrap.Tooltip(button, {
-            title: 'Copied!',
-            trigger: 'manual'
-        });
-        tooltip.show();
+        button.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
         
         setTimeout(() => {
-            tooltip.hide();
             button.innerHTML = originalIcon;
         }, 2000);
     }).catch(err => {
         console.error('Failed to copy text: ', err);
     });
 }
-// Initialize tooltips
-var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-  return new bootstrap.Tooltip(tooltipTriggerEl)
-})
 </script>
 {% endblock %} 

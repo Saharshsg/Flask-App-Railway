@@ -4,7 +4,7 @@ from wtforms.validators import DataRequired, Length, Optional
 
 class AttendanceForm(FlaskForm):
     status = SelectField('Your Status', choices=[('Yes', 'Coming'), ('No', 'Not Coming')], validators=[DataRequired()])
-    meal_preference = SelectField('Meal', choices=[('Veg', 'Veg'), ('Non-Veg', 'Non-Veg')], validators=[Optional()])
+    meal_preference = SelectField('Meal', choices=[('Veg', 'Veg'), ('Non-Veg', 'Non-Veg'), ('No Meal', 'No Meal')], validators=[Optional()])
     submit = SubmitField('Save')
 
     def validate_meal_preference(self, meal_preference):

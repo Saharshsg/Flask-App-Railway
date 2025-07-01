@@ -53,12 +53,23 @@ def load_user(id):
     return db.session.get(User, int(id))
 
 
+class WeekConfig(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    week_start_date = db.Column(db.Date, unique=True, index=True)  # Monday of the week
+    is_locked = db.Column(db.Boolean, default=True)  # New weeks are locked by default
+    created_by = db.Column(db.Integer, sa.ForeignKey('user.id'))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<WeekConfig {self.week_start_date}: {"Locked" if self.is_locked else "Unlocked"}>'
+
+
 class Schedule(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, sa.ForeignKey('user.id'), index=True)
     date = db.Column(db.Date, index=True)
     status = db.Column(db.String(10))
-    meal_preference = db.Column(db.String(10), nullable=True)
+    meal_preference = db.Column(db.String(10), nullable=True)  # Now supports "No Meal" option
     was_auto_assigned = db.Column(db.Boolean, default=False)
     reassignment_request = db.Column(db.Boolean, default=False)
     reassignment_reason = db.Column(db.String(300), nullable=True)

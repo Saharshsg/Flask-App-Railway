@@ -1,27 +1,89 @@
 {% extends "base.html" %}
-{% from 'bootstrap4/form.html' import render_form %}
 
 {% block app_content %}
-<div class="container mt-4">
-    <h1 class="display-5">Edit User: {{ user.username }}</h1>
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <form method="POST" action="">
-                        {{ form.hidden_tag() }}
-                        <div class="form-check mb-3">
-                            {{ form.is_admin(class="form-check-input") }}
-                            {{ form.is_admin.label(class="form-check-label") }}
-                        </div>
-                        <div class="form-check mb-3">
-                            {{ form.is_intern(class="form-check-input") }}
-                            {{ form.is_intern.label(class="form-check-label") }}
-                        </div>
-                        {{ form.submit(class="btn btn-primary") }}
-                        <a href="{{ url_for('admin.manage_users') }}" class="btn btn-outline-secondary">Cancel</a>
-                    </form>
+<div class="min-h-screen py-8 px-4">
+    <div class="max-w-2xl mx-auto">
+        <!-- Glowing card container -->
+        <div class="group relative">
+            <div class="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
+            <div class="relative bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-xl p-8">
+                
+                <!-- Header -->
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 mb-4">
+                        Edit User
+                    </h1>
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
+                        <p class="text-slate-300 leading-relaxed">
+                            Editing roles for user: <span class="text-cyan-400 font-semibold">{{ user.username }}</span>
+                        </p>
+                    </div>
                 </div>
+
+                <!-- Form -->
+                <form method="POST" action="" class="space-y-6">
+                    {{ form.hidden_tag() }}
+                    
+                    <!-- Admin Role -->
+                    <div class="bg-slate-800/30 border border-slate-700/50 rounded-lg p-4">
+                        <div class="flex items-center space-x-3">
+                            <input 
+                                type="checkbox" 
+                                id="{{ form.is_admin.id }}" 
+                                name="{{ form.is_admin.name }}" 
+                                {% if form.is_admin.data %}checked{% endif %}
+                                class="w-5 h-5 text-cyan-500 bg-slate-800 border-slate-600 rounded focus:ring-cyan-500 focus:ring-2 transition-colors duration-200"
+                            >
+                            <label for="{{ form.is_admin.id }}" class="text-slate-300 font-medium cursor-pointer">
+                                {{ form.is_admin.label.text }}
+                            </label>
+                        </div>
+                        <p class="text-slate-500 text-sm mt-2 ml-8">
+                            Grants administrative privileges including user management and admin dashboard access.
+                        </p>
+                    </div>
+
+                    <!-- Intern Role -->
+                    <div class="bg-slate-800/30 border border-slate-700/50 rounded-lg p-4">
+                        <div class="flex items-center space-x-3">
+                            <input 
+                                type="checkbox" 
+                                id="{{ form.is_intern.id }}" 
+                                name="{{ form.is_intern.name }}" 
+                                {% if form.is_intern.data %}checked{% endif %}
+                                class="w-5 h-5 text-blue-500 bg-slate-800 border-slate-600 rounded focus:ring-blue-500 focus:ring-2 transition-colors duration-200"
+                            >
+                            <label for="{{ form.is_intern.id }}" class="text-slate-300 font-medium cursor-pointer">
+                                {{ form.is_intern.label.text }}
+                            </label>
+                        </div>
+                        <p class="text-slate-500 text-sm mt-2 ml-8">
+                            Marks this user as an intern for scheduling and assignment purposes.
+                        </p>
+                    </div>
+                    
+                    <!-- Action buttons -->
+                    <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                        <button 
+                            type="submit" 
+                            class="flex-1 bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white py-3 px-6 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-slate-900 flex items-center justify-center gap-2"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Save Changes
+                        </button>
+                        <a 
+                            href="{{ url_for('admin.manage_users') }}" 
+                            class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-3 px-6 rounded-lg font-semibold border border-slate-600 transition-colors duration-200 text-center focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:ring-offset-slate-900 flex items-center justify-center gap-2"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            Cancel
+                        </a>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

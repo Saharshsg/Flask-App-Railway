@@ -1,11 +1,105 @@
 {% extends "base.html" %}
-{% from 'bootstrap/form.html' import render_form %}
 
 {% block app_content %}
-    <h1>Sign In</h1>
-    {{ render_form(form) }}
-    <br>
-    <p>Forgot Your Password?
-        <a href="{{ url_for('auth.reset_password_request') }}">Click to Reset It</a>
-    </p>
+<div class="min-h-screen flex items-center justify-center py-8 px-4">
+    <div class="max-w-md w-full">
+        <!-- Glowing card container -->
+        <div class="group relative">
+            <div class="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
+            <div class="relative bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-xl p-8">
+                
+                <!-- Header -->
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 mb-2">
+                        Sign In
+                    </h1>
+                    <p class="text-slate-400">Welcome back to Office Planner</p>
+                </div>
+
+                <!-- Form -->
+                <form method="POST" class="space-y-6">
+                    {{ form.hidden_tag() }}
+                    
+                    <!-- Username Field -->
+                    <div>
+                        <label for="{{ form.username.id }}" class="block text-sm font-medium text-cyan-300 mb-2">
+                            {{ form.username.label.text }}
+                        </label>
+                        <input 
+                            type="text" 
+                            id="{{ form.username.id }}" 
+                            name="{{ form.username.name }}" 
+                            value="{{ form.username.data or '' }}"
+                            class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 focus:outline-none transition-colors duration-200"
+                            placeholder="Enter your username"
+                            required
+                        >
+                        {% if form.username.errors %}
+                            <div class="mt-2 text-red-400 text-sm">
+                                {% for error in form.username.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Password Field -->
+                    <div>
+                        <label for="{{ form.password.id }}" class="block text-sm font-medium text-cyan-300 mb-2">
+                            {{ form.password.label.text }}
+                        </label>
+                        <input 
+                            type="password" 
+                            id="{{ form.password.id }}" 
+                            name="{{ form.password.name }}" 
+                            class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 focus:outline-none transition-colors duration-200"
+                            placeholder="Enter your password"
+                            required
+                        >
+                        {% if form.password.errors %}
+                            <div class="mt-2 text-red-400 text-sm">
+                                {% for error in form.password.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Remember Me -->
+                    {% if form.remember_me %}
+                    <div class="flex items-center">
+                        <input 
+                            type="checkbox" 
+                            id="{{ form.remember_me.id }}" 
+                            name="{{ form.remember_me.name }}" 
+                            class="w-4 h-4 text-cyan-500 bg-slate-800 border-slate-600 rounded focus:ring-cyan-500 focus:ring-2"
+                        >
+                        <label for="{{ form.remember_me.id }}" class="ml-2 text-sm text-slate-300">
+                            {{ form.remember_me.label.text }}
+                        </label>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Submit Button -->
+                    <button 
+                        type="submit" 
+                        class="w-full bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white py-3 px-6 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+                    >
+                        Sign In
+                    </button>
+                </form>
+
+                <!-- Footer Links -->
+                <div class="mt-6 text-center">
+                    <p class="text-slate-400 text-sm">
+                        Forgot Your Password?
+                        <a href="{{ url_for('auth.reset_password_request') }}" class="text-cyan-400 hover:text-cyan-300 font-medium transition-colors duration-200">
+                            Click to Reset It
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %} 

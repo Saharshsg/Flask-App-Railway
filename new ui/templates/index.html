@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% import 'bootstrap4/form.html' as wtf %}
+
+{% block app_content %}
+    <div class="container mt-4">
+        <!-- Hero Section -->
+        <div class="text-center mb-5">
+            <h1 class="display-5 mb-4">Weekly Office Schedule</h1>
+            <p class="lead text-muted glow-text">AI-Enhanced Office Planning System</p>
+        </div>
+
+        <!-- Schedule Cards Grid -->
+        <div class="row g-4">
+            {% for day, details in schedule_data.items() %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100 interactive-hover cyber-border">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0 glow-text">
+                                    <i class="bi bi-calendar-day me-2"></i>{{ day }}
+                                </h5>
+                                <small class="text-muted">{{ details.date.strftime('%B %d') }}</small>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body d-flex flex-column">
+                            <!-- Capacity Status -->
+                            <div class="mb-3">
+                                {% if details.slots_filled >= OFFICE_CAPACITY %}
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-people-fill me-1"></i>
+                                        {{ details.slots_filled }} / {{ OFFICE_CAPACITY }} Slots Filled
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-people me-1"></i>
+                                        {{ details.slots_filled }} / {{ OFFICE_CAPACITY }} Slots Available
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Attendees List -->
+                            <div class="mb-3">
+                                <h6 class="card-subtitle text-muted mb-2 glow-text">
+                                    <i class="bi bi-person-check me-1"></i>Who's coming:
+                                </h6>
+                                {% if details.attendees %}
+                                    <ul class="list-group list-group-flush">
+                                        {% for name in details.attendees %}
+                                            <li class="list-group-item">{{ name }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p class="text-muted fst-italic">
+                                        <i class="bi bi-person-x me-1"></i>No one yet.
+                                    </p>
+                                {% endif %}
+                            </div>
+
+                            <hr class="my-3">
+
+                            <!-- Action Buttons -->
+                            <div class="mt-auto">
+                                {% if not details.is_past %}
+                                    {% set user_choice = details.user_choice %}
+
+                                    <!-- User is Attending -->
+                                    {% if user_choice and user_choice.status == 'Yes' %}
+                                        <div class="text-center">
+                                            <div class="alert alert-success py-2 mb-3">
+                                                <i class="bi bi-check-circle me-1"></i>
+                                                <strong>You are attending</strong>
+                                            </div>
+                                            
+                                            {% if user_choice.was_auto_assigned %}
+                                                <span class="badge bg-info mb-3">
+                                                    <i class="bi bi-robot me-1"></i>AI Auto-Assigned
+                                                </span>
+                                            {% endif %}
+                                            
+                                            <div class="d-grid gap-2">
+                                                <a href="{{ url_for('main.request_reassignment', schedule_id=user_choice.id) }}" 
+                                                   class="btn btn-outline-secondary">
+                                                    <i class="bi bi-arrow-repeat me-1"></i>Request Swap
+                                                </a>
+                                                
+                                                {% if not user_choice.was_auto_assigned %}
+                                                    <form action="{{ url_for('main.index') }}" method="post" class="d-grid">
+                                                        {{ form.hidden_tag() }}
+                                                        <input type="hidden" name="day_date" value="{{ details.date.isoformat() }}">
+                                                        <input type="hidden" name="status" value="No">
+                                                        <button type="submit" class="btn btn-outline-danger">
+                                                            <i class="bi bi-x-circle me-1"></i>Cancel Attendance
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                    <!-- User is Not Attending -->
+                                    {% else %}
+                                        <div class="d-grid gap-2">
+                                            <!-- Office has space -->
+                                            {% if details.slots_filled < OFFICE_CAPACITY %}
+                                                <form action="{{ url_for('main.index') }}" method="post" class="d-grid gap-3">
+                                                    {{ form.hidden_tag() }}
+                                                    <input type="hidden" name="day_date" value="{{ details.date.isoformat() }}">
+                                                    <input type="hidden" name="status" value="Yes">
+                                                    
+                                                    <div class="form-floating">
+                                                        {{ wtf.render_field(form.meal_preference, class="form-select") }}
+                                                        <label for="{{ form.meal_preference.id }}">
+                                                            <i class="bi bi-cup-hot me-1"></i>Meal Preference
+                                                        </label>
+                                                    </div>
+                                                    
+                                                    <button type="submit" class="btn btn-primary">
+                                                        <i class="bi bi-plus-circle me-1"></i>I'm Coming
+                                                    </button>
+                                                </form>
+                                            {% else %}
+                                                <div class="alert alert-warning text-center py-2">
+                                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                                    Office is full
+                                                </div>
+                                            {% endif %}
+                                            
+                                            <!-- Not Coming Button -->
+                                            <form action="{{ url_for('main.index') }}" method="post" class="d-grid">
+                                                {{ form.hidden_tag() }}
+                                                <input type="hidden" name="day_date" value="{{ details.date.isoformat() }}">
+                                                <input type="hidden" name="status" value="No">
+                                                <button type="submit" class="btn btn-secondary">
+                                                    <i class="bi bi-dash-circle me-1"></i>I'm Not Coming
+                                                </button>
+                                            </form>
+                                        </div>
+
+                                        <!-- Availability Toggle -->
+                                        <div class="text-center mt-3">
+                                            <form action="{{ url_for('main.toggle_availability', date_iso=details.date.isoformat()) }}" 
+                                                  method="POST" class="d-grid">
+                                                {% if user_choice and user_choice.is_available %}
+                                                    <button type="submit" class="btn btn-sm btn-outline-dark">
+                                                        <i class="bi bi-toggle-off me-1"></i>Not Available for Swaps
+                                                    </button>
+                                                {% else %}
+                                                    <button type="submit" class="btn btn-sm btn-outline-success">
+                                                        <i class="bi bi-toggle-on me-1"></i>Available for Swaps
+                                                    </button>
+                                                {% endif %}
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                                {% else %}
+                                    <div class="alert alert-secondary text-center py-2">
+                                        <i class="bi bi-clock-history me-1"></i>
+                                        <em>This day is in the past</em>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

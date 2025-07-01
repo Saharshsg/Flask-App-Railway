@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% import 'bootstrap4/form.html' as wtf %}
+
+{% block app_content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card ai-enhanced cyber-border">
+                <div class="card-header text-center">
+                    <h1 class="card-title mb-0 glow-text">
+                        <i class="bi bi-arrow-repeat me-2"></i>Request Reassignment
+                    </h1>
+                    <p class="text-muted mt-2 mb-0">AI-Powered Schedule Optimization</p>
+                </div>
+                
+                <div class="card-body p-4">
+                    <div class="alert alert-info mb-4">
+                        <i class="bi bi-info-circle me-2"></i>
+                        You are requesting a reassignment for your spot on 
+                        <strong class="glow-text">{{ schedule_entry.date.strftime('%A, %B %d, %Y') }}</strong>
+                    </div>
+                    
+                    <form method="POST" class="form" role="form">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-4">
+                            <label for="{{ form.reason.id }}" class="form-label">
+                                <i class="bi bi-chat-text me-1"></i>Reason for Request
+                            </label>
+                            {{ wtf.render_field(form.reason, 
+                                rows=4, 
+                                class="form-control",
+                                placeholder="Please provide a brief reason for your reassignment request. Our AI will help find the best alternative arrangement...") }}
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{{ url_for('main.index') }}" class="btn btn-secondary me-md-2">
+                                <i class="bi bi-arrow-left me-1"></i>Cancel
+                            </a>
+                            {{ wtf.render_field(form.submit, class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="card-footer text-center text-muted">
+                    <small class="glow-text">
+                        <i class="bi bi-robot me-1"></i>
+                        Our AI system will automatically find the best reassignment options
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

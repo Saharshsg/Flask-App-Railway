@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+        <!-- Locked Week Card -->
+        <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-8 text-center">
+            <div class="mb-6">
+                <div class="w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full mx-auto flex items-center justify-center">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-1a2 2 0 00-2-2H6a2 2 0 00-2 2v1a2 2 0 002 2zM12 7a2 2 0 100-4 2 2 0 000 4z"></path>
+                    </svg>
+                </div>
+            </div>
+            
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent mb-4">
+                Schedule Locked
+            </h1>
+            
+            <p class="text-slate-300 text-lg mb-6">
+                The schedule for the week of <span class="text-cyan-400 font-semibold">{{ week_start.strftime('%B %d, %Y') }}</span> is currently locked.
+            </p>
+            
+            <div class="bg-slate-900/50 border border-slate-600/50 rounded-lg p-6 mb-6">
+                <h3 class="text-lg font-semibold text-white mb-3">What this means:</h3>
+                <ul class="text-slate-300 space-y-2 text-left">
+                    <li class="flex items-center">
+                        <div class="w-2 h-2 bg-cyan-400 rounded-full mr-3"></div>
+                        You cannot currently make changes to your attendance
+                    </li>
+                    <li class="flex items-center">
+                        <div class="w-2 h-2 bg-cyan-400 rounded-full mr-3"></div>
+                        The admin will unlock the schedule when ready
+                    </li>
+                    <li class="flex items-center">
+                        <div class="w-2 h-2 bg-cyan-400 rounded-full mr-3"></div>
+                        You'll receive a notification when it's available
+                    </li>
+                </ul>
+            </div>
+            
+            <p class="text-slate-400 text-sm mb-6">
+                Please check back later or contact your administrator if you have any questions.
+            </p>
+            
+            <button onclick="window.location.reload()" class="bg-gradient-to-r from-cyan-400 to-purple-500 hover:from-cyan-300 hover:to-purple-400 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105">
+                Check Again
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %} 

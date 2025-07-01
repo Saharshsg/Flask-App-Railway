@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
+                Manage Weeks
+            </h1>
+            <a href="{{ url_for('admin.admin_dashboard') }}" 
+               class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg transition-colors">
+                ← Back to Dashboard
+            </a>
+        </div>
+
+        <!-- Weeks List -->
+        <div class="space-y-6">
+            {% for week in weeks %}
+            <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="text-xl font-semibold text-white">
+                            {{ week.week_start.strftime('%B %d') }} - {{ week.week_end.strftime('%B %d, %Y') }}
+                        </h3>
+                        <p class="text-slate-400">
+                            Week starting {{ week.week_start.strftime('%A, %B %d') }}
+                        </p>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <!-- Lock Status Badge -->
+                        {% if week.is_locked %}
+                        <span class="bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-sm font-medium border border-red-500/30">
+                            🔒 Locked
+                        </span>
+                        {% else %}
+                        <span class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm font-medium border border-green-500/30">
+                            🔓 Unlocked
+                        </span>
+                        {% endif %}
+                        
+                        <!-- Toggle Button -->
+                        <form method="POST" action="{{ url_for('admin.toggle_week_lock') }}" class="inline">
+                            <input type="hidden" name="week_start" value="{{ week.week_start.isoformat() }}">
+                            {% if week.is_locked %}
+                            <button type="submit" 
+                                    class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg transition-colors"
+                                    onclick="return confirm('Unlock this week for employee access?')">
+                                Unlock Week
+                            </button>
+                            {% else %}
+                            <button type="submit" 
+                                    class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg transition-colors"
+                                    onclick="return confirm('Lock this week to prevent employee changes?')">
+                                Lock Week
+                            </button>
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Office Days -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {% for office_date, day_name in week.office_dates %}
+                    <div class="bg-slate-900/50 border border-slate-600/50 rounded-lg p-4">
+                        <h4 class="font-semibold text-cyan-400 mb-2">{{ day_name }}</h4>
+                        <p class="text-slate-300 text-sm">{{ office_date.strftime('%B %d, %Y') }}</p>
+                        {% if office_date < today %}
+                        <span class="text-slate-500 text-xs">Past</span>
+                        {% elif office_date == today %}
+                        <span class="text-yellow-400 text-xs">Today</span>
+                        {% else %}
+                        <span class="text-green-400 text-xs">Future</span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if not week.config_exists %}
+                <div class="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                    <p class="text-yellow-400 text-sm">
+                        ⚠️ This week has no configuration yet. It will be locked by default until unlocked.
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Help Text -->
+        <div class="mt-8 bg-slate-900/50 border border-slate-600/50 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-white mb-3">How Week Locking Works</h3>
+            <ul class="text-slate-300 space-y-2">
+                <li class="flex items-center">
+                    <div class="w-2 h-2 bg-cyan-400 rounded-full mr-3"></div>
+                    <strong>Locked weeks:</strong> Employees cannot make changes to their attendance
+                </li>
+                <li class="flex items-center">
+                    <div class="w-2 h-2 bg-cyan-400 rounded-full mr-3"></div>
+                    <strong>Unlocked weeks:</strong> Employees can update their attendance and meal preferences
+                </li>
+                <li class="flex items-center">
+                    <div class="w-2 h-2 bg-cyan-400 rounded-full mr-3"></div>
+                    <strong>New weeks:</strong> Are locked by default until you manually unlock them
+                </li>
+                <li class="flex items-center">
+                    <div class="w-2 h-2 bg-cyan-400 rounded-full mr-3"></div>
+                    <strong>Admins:</strong> Can always view and modify schedules regardless of lock status
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %} 

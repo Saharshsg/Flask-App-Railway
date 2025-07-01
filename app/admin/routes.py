@@ -3,7 +3,7 @@ from app import db
 from app.admin import bp
 from app.admin.forms import SwapForm, EditUserForm
 from flask_login import current_user, login_required
-from app.models import User, Schedule
+from app.models import User, Schedule, WeekConfig
 from datetime import date, timedelta
 import sqlalchemy as sa
 from functools import wraps
@@ -13,7 +13,31 @@ from app.email import send_swap_confirmation_email
 
 # Constants
 OFFICE_CAPACITY = 6
-OFFICE_DAYS = [2, 3, 4] # Wednesday, Thursday, Friday
+OFFICE_DAYS = [1, 2, 4]  # Tuesday, Wednesday, Friday (0=Monday, 1=Tuesday, etc.)
+OFFICE_DAY_NAMES = ['Tuesday', 'Wednesday', 'Friday']
+
+def get_week_start(target_date):
+    """Get Monday of the week containing target_date"""
+    return target_date - timedelta(days=target_date.weekday())
+
+def get_current_week_dates():
+    """Get the dates for the current active week based on today's date"""
+    today = date.today()
+    
+    # If today is Saturday or Sunday, show next week
+    if today.weekday() >= 5:  # Saturday or Sunday
+        next_monday = today + timedelta(days=(7 - today.weekday()))
+        week_start = next_monday
+    else:
+        # Check if we've passed Friday of current week
+        week_start = get_week_start(today)
+        friday_of_week = week_start + timedelta(days=4)  # Friday
+        
+        if today > friday_of_week:
+            # Move to next week
+            week_start = week_start + timedelta(weeks=1)
+    
+    return week_start
 
 def admin_required(fn):
     @wraps(fn)
@@ -27,9 +51,13 @@ def admin_required(fn):
 @login_required
 @admin_required
 def admin_dashboard():
-    today = date.today()
-    start_of_week = today - timedelta(days=today.weekday())
-    week_dates = [start_of_week + timedelta(days=i) for i in OFFICE_DAYS]
+    week_start = get_current_week_dates()
+    week_dates = [week_start + timedelta(days=i) for i in OFFICE_DAYS]
+
+    # Get week config
+    week_config = db.session.scalar(
+        sa.select(WeekConfig).where(WeekConfig.week_start_date == week_start)
+    )
 
     all_schedule_entries = db.session.scalars(
         sa.select(Schedule).where(
@@ -40,8 +68,9 @@ def admin_dashboard():
     admin_schedule_data = {}
     whatsapp_messages = {}
 
-    for day_date in week_dates:
-        day_name = day_date.strftime('%A')
+    for i, office_day in enumerate(OFFICE_DAYS):
+        day_date = week_start + timedelta(days=office_day)
+        day_name = OFFICE_DAY_NAMES[i]
         entries_for_day = [e for e in all_schedule_entries if e.date == day_date]
         
         attendees = [e for e in entries_for_day if e.status == 'Yes']
@@ -50,6 +79,7 @@ def admin_dashboard():
         
         veg_count = sum(1 for e in attendees if e.meal_preference == 'Veg')
         non_veg_count = sum(1 for e in attendees if e.meal_preference == 'Non-Veg')
+        no_meal_count = sum(1 for e in attendees if e.meal_preference == 'No Meal')
         
         admin_schedule_data[day_name] = {
             'date': day_date,
@@ -58,6 +88,7 @@ def admin_dashboard():
             'available_for_swap': sorted(available_for_swap, key=lambda x: x.user.username),
             'veg_count': veg_count,
             'non_veg_count': non_veg_count,
+            'no_meal_count': no_meal_count,
             'total_attendees': len(attendees)
         }
 
@@ -67,14 +98,88 @@ def admin_dashboard():
                 message += f"{i}. {entry.user.username}\n"
             
             message += f"\nTotal: *{len(attendees)}*\n"
-            message += f"Meals: Veg - *{veg_count}*, Non-Veg - *{non_veg_count}*"
+            if veg_count > 0 or non_veg_count > 0:
+                message += f"Meals: Veg - *{veg_count}*, Non-Veg - *{non_veg_count}*"
+                if no_meal_count > 0:
+                    message += f", No Meal - *{no_meal_count}*"
+            else:
+                message += f"No Meal - *{no_meal_count}*"
             whatsapp_messages[day_name] = message
 
     return render_template('admin/dashboard.html', 
                            title='Admin Dashboard', 
                            schedule_data=admin_schedule_data,
                            whatsapp_messages=whatsapp_messages,
-                           OFFICE_CAPACITY=OFFICE_CAPACITY)
+                           OFFICE_CAPACITY=OFFICE_CAPACITY,
+                           week_start=week_start,
+                           week_config=week_config,
+                           is_week_locked=week_config.is_locked if week_config else True)
+
+@bp.route('/toggle_week_lock', methods=['POST'])
+@login_required
+@admin_required
+def toggle_week_lock():
+    week_start_str = request.form.get('week_start')
+    if not week_start_str:
+        flash('Invalid week start date.', 'danger')
+        return redirect(url_for('admin.admin_dashboard'))
+    
+    week_start = date.fromisoformat(week_start_str)
+    
+    week_config = db.session.scalar(
+        sa.select(WeekConfig).where(WeekConfig.week_start_date == week_start)
+    )
+    
+    if not week_config:
+        # Create new week config
+        week_config = WeekConfig(
+            week_start_date=week_start,
+            is_locked=False,  # Unlock it
+            created_by=current_user.id
+        )
+        db.session.add(week_config)
+        action = "unlocked"
+    else:
+        # Toggle existing config
+        week_config.is_locked = not week_config.is_locked
+        action = "locked" if week_config.is_locked else "unlocked"
+    
+    db.session.commit()
+    
+    flash(f'Week of {week_start.strftime("%B %d, %Y")} has been {action} for employee access.', 'success')
+    return redirect(url_for('admin.manage_weeks'))
+
+@bp.route('/test_weeks')
+@login_required
+@admin_required
+def test_weeks():
+    """Test route to debug template issues"""
+    return "<h1>Test route working!</h1><p>If you see this, routing is working. The issue is in template rendering.</p>"
+
+@bp.route('/manage_weeks')
+@login_required
+@admin_required
+def manage_weeks():
+    """View and manage multiple weeks"""
+    try:
+        today = date.today()
+        
+        # Simplified version with minimal data
+        weeks = [{
+            'week_start': today,
+            'week_end': today + timedelta(days=4),
+            'office_dates': [(today, 'Today')],
+            'is_locked': False,
+            'config_exists': True
+        }]
+        
+        return render_template('admin/manage_weeks.html', 
+                             title='Manage Weeks', 
+                             weeks=weeks,
+                             today=today)
+    except Exception as e:
+        current_app.logger.error(f"Error in manage_weeks: {str(e)}")
+        return f"<h1>Error in manage_weeks:</h1><p>{str(e)}</p><a href='/admin'>Back to Admin</a>"
 
 @bp.route('/swap/<int:schedule_id>', methods=['GET', 'POST'])
 @login_required
