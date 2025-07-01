@@ -1,0 +1,19 @@
+<p>Dear Users,</p>
+<p>
+    This is a confirmation that a swap has been processed for <b>{{ schedule_date.strftime('%A, %B %d, %Y') }}</b>.
+</p>
+<ul>
+    <li>
+        <b>{{ original_user.username }}</b> is no longer scheduled to be in the office.
+    </li>
+    <li>
+        <b>{{ replacement_user.username }}</b> is now scheduled to be in the office.
+    </li>
+</ul>
+<p>
+    Thank you for your cooperation.
+</p>
+<p>
+    Sincerely,<br>
+    The Office Planner
+</p> 

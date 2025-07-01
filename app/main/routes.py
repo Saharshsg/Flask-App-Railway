@@ -1,13 +1,12 @@
 from flask import render_template, flash, redirect, url_for, request, abort
 from app import db
 from app.main import bp
-from app.main.forms import AttendanceForm, ReassignmentForm
+from app.main.forms import AttendanceForm, ReassignmentForm, ReassignmentRequestForm
 from flask_login import current_user, login_required
 from app.models import User, Schedule
 from datetime import date, timedelta
 import sqlalchemy as sa
-from app.email import send_email
-from flask import render_template, flash, redirect, url_for, request, abort
+from app.email import send_email, send_swap_request_email
 
 # Constants for clarity
 OFFICE_CAPACITY = 6
@@ -169,22 +168,22 @@ def toggle_availability(date_iso):
 def request_reassignment(schedule_id):
     schedule_entry = db.get_or_404(Schedule, schedule_id)
     if schedule_entry.user_id != current_user.id:
-        abort(403) # User can only request for themselves
-    
-    if schedule_entry.status != 'Yes':
-        flash('You can only request a swap for a day you are scheduled to attend.', 'warning')
+        flash('You can only request reassignment for your own schedule.', 'danger')
         return redirect(url_for('main.index'))
 
-    form = ReassignmentForm()
-
+    form = ReassignmentRequestForm()
     if form.validate_on_submit():
         schedule_entry.reassignment_request = True
         schedule_entry.reassignment_reason = form.reason.data
         db.session.commit()
-        flash('Your reassignment request has been submitted to the admin.', 'success')
+        
+        # Send notification email to admin
+        send_swap_request_email(current_user, schedule_entry)
+        
+        flash('Your request for reassignment has been submitted.', 'success')
         return redirect(url_for('main.index'))
-
+    
     return render_template('request_reassignment.html', 
                            title='Request Reassignment', 
-                           form=form,
-                           schedule_entry=schedule_entry) 
+                           form=form, 
+                           schedule=schedule_entry) 

@@ -1,0 +1,11 @@
+Dear Users,
+
+This is a confirmation that a swap has been processed for {{ schedule_date.strftime('%A, %B %d, %Y') }}.
+
+- {{ original_user.username }} is no longer scheduled to be in the office.
+- {{ replacement_user.username }} is now scheduled to be in the office.
+
+Thank you for your cooperation.
+
+Sincerely,
+The Office Planner 

@@ -1,0 +1,11 @@
+Dear Admin,
+
+The user {{ user.username }} has requested a reassignment for their scheduled office day on {{ schedule_date.strftime('%A, %B %d, %Y') }}.
+
+Their reason is: "{{ reason }}"
+
+You can manage this request by visiting the Admin Dashboard:
+{{ url_for('admin.admin_dashboard', _external=True) }}
+
+Sincerely,
+The Office Planner 

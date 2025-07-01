@@ -1,16 +1,14 @@
-Hi,
+Hello,
 
-The office schedule for the upcoming days has been finalized.
+Here is the office attendance list for {{ schedule_date.strftime('%A, %B %d, %Y') }}:
 
-{% for day_info in schedule %}
-**{{ day_info.day }}**
-Attendees:
-{% for person in day_info.attendees %}
-- {{ person }}
-{% endfor %}
-{{ day_info.meals }}
-
+{% for user in attendees -%}
+- {{ user.username }}
 {% endfor %}
 
-Thanks,
+Total attending: {{ attendees|length }}
+
+Have a productive day!
+
+Sincerely,
 The Office Planner 

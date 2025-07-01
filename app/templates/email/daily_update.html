@@ -14,23 +14,25 @@
 <body>
     <div class="container">
         <p class="header">Office Schedule Update</p>
-        <p>Hi,</p>
-        <p>The office schedule for the upcoming days has been finalized.</p>
-
-        {% for day_info in schedule %}
-        <div class="day-section">
-            <p class="day-header">{{ day_info.day }}</p>
-            <p><strong>Attendees:</strong></p>
-            <ul>
-                {% for person in day_info.attendees %}
-                <li>- {{ person }}</li>
-                {% endfor %}
-            </ul>
-            <p><strong>{{ day_info.meals }}</strong></p>
-        </div>
-        {% endfor %}
-
-        <p>Thanks,<br>The Office Planner</p>
+        <p>Hello,</p>
+        <p>
+            Here is the office attendance list for <b>{{ schedule_date.strftime('%A, %B %d, %Y') }}</b>:
+        </p>
+        <ul>
+            {% for user in attendees %}
+                <li>{{ user.username }}</li>
+            {% endfor %}
+        </ul>
+        <p>
+            Total attending: <b>{{ attendees|length }}</b>
+        </p>
+        <p>
+            Have a productive day!
+        </p>
+        <p>
+            Sincerely,<br>
+            The Office Planner
+        </p>
     </div>
 </body>
 </html> 

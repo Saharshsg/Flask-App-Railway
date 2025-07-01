@@ -1,0 +1,17 @@
+<p>Dear Admin,</p>
+<p>
+    The user <b>{{ user.username }}</b> has requested a reassignment for their scheduled office day on <b>{{ schedule_date.strftime('%A, %B %d, %Y') }}</b>.
+</p>
+<p>
+    Their reason is: <i>"{{ reason }}"</i>
+</p>
+<p>
+    You can manage this request and perform a swap from the admin dashboard.
+</p>
+<p>
+    <a href="{{ url_for('admin.admin_dashboard', _external=True) }}">Go to Admin Dashboard</a>
+</p>
+<p>
+    Sincerely,<br>
+    The Office Planner
+</p> 

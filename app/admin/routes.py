@@ -9,6 +9,7 @@ import sqlalchemy as sa
 from functools import wraps
 import random
 from app.admin.utils import run_auto_assignment_for_date
+from app.email import send_swap_confirmation_email
 
 # Constants
 OFFICE_CAPACITY = 6
@@ -160,6 +161,9 @@ def swap_user(schedule_id):
         original_user = entry_to_swap.user
         replacement_user = db.session.get(User, replacement_user_id)
         
+        # Send confirmation email
+        send_swap_confirmation_email(original_user, replacement_user, swap_date)
+
         flash(f'{original_user.username} has been successfully swapped with {replacement_user.username}.', 'success')
         return redirect(url_for('admin.admin_dashboard'))
 
