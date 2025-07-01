@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% from 'bootstrap4/form.html' import render_form %}
+
+{% block app_content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="card-title">Swap User</h1>
+                </div>
+                <div class="card-body">
+                    <p class="lead">You are swapping <strong>{{ user_to_swap.username }}</strong>'s spot for <strong>{{ date.strftime('%A, %B %d, %Y') }}</strong>.</p>
+                    
+                    <form method="POST" action="" class="form" role="form">
+                        {{ form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ form.replacement_user.label(class="form-label") }}
+                            <select name="replacement_user" id="replacement_user" class="form-select {% if form.replacement_user.errors %}is-invalid{% endif %}">
+                                {% for user_id, username in form.replacement_user.choices %}
+                                    <option value="{{ user_id }}" {% if form.replacement_user.data == user_id %}selected{% endif %}>{{ username }}</option>
+                                {% endfor %}
+                            </select>
+                            {% if form.replacement_user.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.replacement_user.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="mt-4">
+                            {{ form.submit(class="btn btn-primary") }}
+                            <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

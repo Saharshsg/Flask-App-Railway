@@ -1,0 +1,168 @@
+/* 
+Futuristic UI Theme Inspired by Arcwide
+*/
+
+:root {
+    --bg-dark-navy: #020c1b;
+    --navy: #0a192f;
+    --light-navy: #112240;
+    --lightest-navy: #233554;
+    --navy-shadow: rgba(2, 12, 27, 0.7);
+    --dark-slate: #495670;
+    --slate: #8892b0;
+    --light-slate: #a8b2d1;
+    --lightest-slate: #ccd6f6;
+    --white: #e6f1ff;
+    --accent-color: #64ffda;
+    --accent-color-tint: rgba(100, 255, 218, 0.1);
+
+    --font-sans: 'Inter', -apple-system, system-ui, sans-serif;
+    --font-mono: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
+
+    --fz-xxs: 12px;
+    --fz-xs: 13px;
+    --fz-sm: 14px;
+    --fz-md: 16px;
+    --fz-lg: 18px;
+    --fz-xl: 20px;
+    --fz-xxl: 22px;
+}
+
+body {
+    background-color: var(--navy);
+    color: var(--slate);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+}
+
+.navbar {
+    background-color: rgba(10, 25, 47, 0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--lightest-navy);
+}
+
+.logo-img {
+    height: 35px;
+    transition: transform 0.3s ease;
+}
+.logo-img:hover {
+    transform: scale(1.1);
+}
+
+.nav-link {
+    color: var(--light-slate) !important;
+}
+.nav-link:hover, .nav-link.active {
+    color: var(--accent-color) !important;
+}
+
+.welcome-msg {
+    color: var(--slate);
+    margin-right: 1rem;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--lightest-slate);
+    font-weight: 600;
+}
+
+.card {
+    background-color: var(--light-navy);
+    border: 1px solid var(--lightest-navy);
+    border-radius: 4px;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px -15px var(--navy-shadow);
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid var(--lightest-navy);
+    color: var(--white);
+    font-family: var(--font-mono);
+}
+
+.list-group-item {
+    background-color: transparent;
+    color: var(--light-slate);
+    border-bottom: 1px solid var(--lightest-navy) !important;
+}
+
+.btn {
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-primary {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: var(--bg-dark-navy);
+    font-weight: bold;
+}
+.btn-primary:hover {
+    background-color: var(--accent-color-tint);
+    color: var(--accent-color);
+}
+
+.btn-outline-danger {
+    color: #ff7b7b;
+    border-color: #ff7b7b;
+}
+
+.btn-outline-danger:hover {
+    background-color: rgba(255, 123, 123, 0.1);
+}
+
+.btn-outline-secondary {
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+.btn-outline-secondary:hover {
+    background-color: var(--accent-color-tint);
+}
+
+.form-control, .form-select {
+    background-color: var(--navy);
+    color: var(--lightest-slate);
+    border: 1px solid var(--lightest-navy);
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--navy);
+    color: var(--lightest-slate);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px var(--accent-color-tint);
+}
+
+/* Login Page Specific */
+.login-container {
+    max-width: 400px;
+    margin-top: 10vh;
+}
+
+.login-container .card {
+    background-color: var(--light-navy);
+    padding: 2rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeIn 0.5s ease-out forwards;
+} 

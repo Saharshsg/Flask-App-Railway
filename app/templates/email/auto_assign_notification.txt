@@ -1,0 +1,9 @@
+Dear {{ user.username }},
+
+You have been automatically assigned to come to the office on {{ assign_date.strftime('%A, %B %d, %Y') }}.
+A spot became available and you were on the list of available users.
+
+Your meal preference has been set to 'Veg' by default. Please log in to the office planner to change it if needed.
+
+Thank you,
+The Office Planner 

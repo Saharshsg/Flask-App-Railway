@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% from 'bootstrap4/form.html' import render_form %}
+
+{% block app_content %}
+<div class="container mt-4">
+    <h1 class="display-5">Edit User: {{ user.username }}</h1>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="POST" action="">
+                        {{ form.hidden_tag() }}
+                        <div class="form-check mb-3">
+                            {{ form.is_admin(class="form-check-input") }}
+                            {{ form.is_admin.label(class="form-check-label") }}
+                        </div>
+                        <div class="form-check mb-3">
+                            {{ form.is_intern(class="form-check-input") }}
+                            {{ form.is_intern.label(class="form-check-label") }}
+                        </div>
+                        {{ form.submit(class="btn btn-primary") }}
+                        <a href="{{ url_for('admin.manage_users') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

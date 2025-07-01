@@ -1,0 +1,16 @@
+Hi,
+
+The office schedule for the upcoming days has been finalized.
+
+{% for day_info in schedule %}
+**{{ day_info.day }}**
+Attendees:
+{% for person in day_info.attendees %}
+- {{ person }}
+{% endfor %}
+{{ day_info.meals }}
+
+{% endfor %}
+
+Thanks,
+The Office Planner 

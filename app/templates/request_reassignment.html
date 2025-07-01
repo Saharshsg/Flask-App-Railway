@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% import 'bootstrap4/form.html' as wtf %}
+
+{% block app_content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="card-title">Request Reassignment</h1>
+                </div>
+                <div class="card-body">
+                    <p class="lead">You are requesting a reassignment for your spot on <strong>{{ schedule_entry.date.strftime('%A, %B %d, %Y') }}</strong>.</p>
+                    <hr>
+                    <form method="POST" class="form" role="form">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ wtf.render_field(form.reason, rows=4, placeholder="Please provide a brief reason for your request...") }}
+                        </div>
+                        
+                        <div class="mt-4">
+                            {{ wtf.render_field(form.submit, class="btn btn-primary") }}
+                            <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
