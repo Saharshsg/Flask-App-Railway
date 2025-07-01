@@ -186,4 +186,4 @@ def request_reassignment(schedule_id):
     return render_template('request_reassignment.html', 
                            title='Request Reassignment', 
                            form=form, 
-                           schedule=schedule_entry) 
+                           schedule_entry=schedule_entry) 
